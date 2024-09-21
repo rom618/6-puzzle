@@ -2,16 +2,6 @@ from random import choice
 
 number_of_nodes = 0
 
-def test():
-    n1 = Node([1,2,3,4,5,0],5)
-    n2 = Node([0,1,2,5,4,3],0)
-    print(n1)
-    print(n1.node_id)
-    print(n2)
-    print(n2.node_id)
-    bfs(n1)
-    return 0
-
 # we define a node class where state is the 6-puzzle state,
 # index is the position of the blank square
 # node_id is the unique id corresponding to the puzzle state
@@ -31,13 +21,14 @@ class Node:
     def set_index(self,index):
         self.index=index
 
+    def set_node_id(self):
+        self.node_id=3*self.state[0]+5*self.state[1]+7*self.state[2]+11*self.state[3]+13*self.state[4]+17*self.state[5]
+
     # print out the 6-puzzle state of the node
     def __str__(self):
         return f"[{self.state[0]} {self.state[1]} {self.state[2]}]\n[{self.state[3]} {self.state[4]} {self.state[5]}]"
 
 def expand(node):
-
-    print("here")
 
     global number_of_nodes
 
@@ -46,11 +37,14 @@ def expand(node):
 
     #expand up
     if i>=3:
-
-        child = Node(node.state, node.index, node)
+        temp=[]
+        for j in node.state:
+            temp.append(j)
+        child = Node(temp, node.index, node)
         child.state[i]=child.state[i-3]
         child.state[i-3]=0
-        child.set_index=i-3
+        child.set_index(i-3)
+        child.set_node_id()
 
         list.append(child)
 
@@ -58,34 +52,45 @@ def expand(node):
 
     #expand down
     if i<=2:
-        child = Node(node.state, node.index, node)
+        temp=[]
+        for j in node.state:
+            temp.append(j)
+        child = Node(temp, node.index, node)
         child.state[i]=child.state[i+3]
         child.state[i+3]=0
-        child.set_index=i+3
+        child.set_index(i+3)
+        child.set_node_id()
 
-        list.append(child)
-
-        number_of_nodes+=1
-
-    #expand right
-    if i%3==2:
-
-        child = Node(node.state, node.index, node)
-        child.state[i]=child.state[i-1]
-        child.state[i-1]=0
-        child.set_index=i-1
 
         list.append(child)
 
         number_of_nodes+=1
 
     #expand left
-    if i%3==0:
+    if i%3==2:
+        temp=[]
+        for j in node.state:
+            temp.append(j)
+        child = Node(temp, node.index, node)
+        child.state[i]=child.state[i-1]
+        child.state[i-1]=0
+        child.set_index(i-1)
+        child.set_node_id()
 
-        child = Node(node.state, node.index, node)
+        list.append(child)
+
+        number_of_nodes+=1
+
+    #expand right
+    if i%3==0:
+        temp=[]
+        for j in node.state:
+            temp.append(j)
+        child = Node(temp, node.index, node)
         child.state[i]=child.state[i+1]
         child.state[i+1]=0
-        child.set_index=i+1
+        child.set_index(i+1)
+        child.set_node_id()
 
         list.append(child)
 
@@ -148,15 +153,21 @@ def random_6_puzzle():
     puzzle = []
 
     for i in range(6):
-        puzzle[i]=choice(digits)
+        puzzle.append(choice(digits))
         digits.remove(puzzle[i])
     return puzzle
+
+def find_zero(list):
+    for i in range(len(list)):
+        if list[i]==0:
+            return i
 
 # breadth first search
 def bfs(initial_state):
     nodes_traversed=[]
     queue = Queue()
     queue.enqueue(initial_state)
+    nodes_traversed.append(initial_state.node_id)
     while len(nodes_traversed)!=100:
         if queue.length==0:
             print(f"solution not found. nodes created: {number_of_nodes}")
@@ -165,11 +176,13 @@ def bfs(initial_state):
         if queue.peek().state==[0,1,2,5,4,3]:
             print(f"found after creating {number_of_nodes} nodes")
             print(nodes_traversed)
+            print(queue.peek())
             return 1
         for j in expand(queue.dequeue()):
-            if not j.index in nodes_traversed:
+            if not j.node_id in nodes_traversed:
                 queue.enqueue(j)
-                nodes_traversed.append(j.index)
+                nodes_traversed.append(j.node_id)
+                print(f"{j}\n")
     print(f"program timed out after creating {number_of_nodes} nodes")
     print(nodes_traversed)
     return
@@ -184,4 +197,8 @@ def ids():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    test()
+    temp_state=random_6_puzzle()
+    root = Node(temp_state,find_zero(temp_state))
+    print(f"\n{root}\n")
+    bfs(root)
+
