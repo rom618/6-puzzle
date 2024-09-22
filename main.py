@@ -270,7 +270,6 @@ def dfs(initial_state):
             if child.node_id not in nodes_traversed:
                 if child.node_id=="012543":
                     print(f"found after creating {number_of_nodes} nodes\n")
-                    print(nodes_traversed)
                     return child
                 queue.enqueue_front(child)
         nodes_traversed.add(temp.node_id)
