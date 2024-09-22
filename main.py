@@ -105,7 +105,7 @@ def expand(node):
 
     # order the children by lowest-numbered moved piece '
 
-    children.sort(key=lambda child: child.state[node.index])
+    children.sort(key=lambda child: child.state[node.index],reverse=True)
 
     return children
 
@@ -235,14 +235,14 @@ def bfs(initial_state):
             print(f"solution not found. nodes created: {number_of_nodes}\n")
             return 0
         
-        if queue.peek_last().node_id=="012543":
-            print(f"found after creating {number_of_nodes} nodes\n")
-            return queue.peek_last()
-        
-        for child in expand(queue.dequeue()):
+        temp=queue.dequeue()
+        for child in expand(temp):
             if child.node_id not in nodes_traversed:
+                if child.node_id=="012543":
+                    print(f"found after creating {number_of_nodes} nodes\n")
+                    return child
                 queue.enqueue(child)
-                nodes_traversed.add(child.node_id)
+        nodes_traversed.add(temp.node_id)
 
     print(f"program timed out after creating {number_of_nodes} nodes\n")
     return 0
@@ -265,15 +265,15 @@ def dfs(initial_state):
         if queue.length==0:
             print(f"solution not found. nodes created: {number_of_nodes}\n")
             return 0
-        
-        if queue.peek_first().node_id=="012543":
-            print(f"found after creating {number_of_nodes} nodes\n")
-            return queue.peek_first()
-        
-        for child in expand(queue.dequeue()):
+        temp=queue.dequeue()
+        for child in expand(temp):
             if child.node_id not in nodes_traversed:
+                if child.node_id=="012543":
+                    print(f"found after creating {number_of_nodes} nodes\n")
+                    print(nodes_traversed)
+                    return child
                 queue.enqueue_front(child)
-                nodes_traversed.add(child.node_id)
+        nodes_traversed.add(temp.node_id)
 
     print(f"program timed out after creating {number_of_nodes} nodes\n")
     return 0
@@ -331,24 +331,30 @@ def ids(initial_state):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     #temp_state=random_6_puzzle()
-    temp_state=[3,1,5,4,2,0]
+    temp_state=[1,4,2,5,3,0]
     root = Node(temp_state,find_zero(temp_state))
     print(f"start state: \n{root}\n")
 
     # BFS
     start = time.perf_counter()
-    print(trace_node_path(bfs(root)))
+    result=bfs(root)
+    print(trace_node_path(result))
+    print(f"Length of the path is: {depth(result)}")
     end = time.perf_counter() - start
     print('{:.6f}s\n'.format(end))
 
     # DFS
     start = time.perf_counter()
-    print(trace_node_path(dfs(root)))
+    result=dfs(root)
+    print(trace_node_path(result))
+    print(f"Length of the path is: {depth(result)}")
     end = time.perf_counter() - start
     print('{:.6f}s\n'.format(end))
 
     # IDS
     start = time.perf_counter()
-    print(trace_node_path(ids(root)))
+    result=ids(root)
+    print(trace_node_path(result))
+    print(f"Length of the path is: {depth(result)}")
     end = time.perf_counter() - start
     print('{:.6f}s\n'.format(end))
