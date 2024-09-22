@@ -169,7 +169,7 @@ class Queue:
         if self.length!=1:
             temp_node=self.head
             string =f"Queue: \n{temp_node.item}"
-            for i in range(self.length-1):
+            for _ in range(self.length-1):
                 temp_node=temp_node.next
                 if temp_node is not None:
                     temp_string=f"\n\n{temp_node.item}"
@@ -218,6 +218,11 @@ def find_zero(list):
 
 # breadth first search
 def bfs(initial_state):
+
+    # reset number of nodes created counter
+    global number_of_nodes
+    number_of_nodes = 0
+
     print("Breadth first search: \n")
     nodes_traversed=set()
     queue = Queue()
@@ -234,17 +239,21 @@ def bfs(initial_state):
             print(f"found after creating {number_of_nodes} nodes\n")
             return queue.peek_last()
         
-        for j in expand(queue.dequeue()):
-            if j.node_id not in nodes_traversed:
-                queue.enqueue(j)
-                nodes_traversed.add(j.node_id)
+        for child in expand(queue.dequeue()):
+            if child.node_id not in nodes_traversed:
+                queue.enqueue(child)
+                nodes_traversed.add(child.node_id)
 
     print(f"program timed out after creating {number_of_nodes} nodes\n")
-    print(nodes_traversed)
     return 0
 
 # depth first search
 def dfs(initial_state):
+
+    # reset number of nodes created counter
+    global number_of_nodes
+    number_of_nodes = 0
+
     print("Depth first search: \n")
     nodes_traversed=set()
     queue = Queue()
@@ -261,41 +270,63 @@ def dfs(initial_state):
             print(f"found after creating {number_of_nodes} nodes\n")
             return queue.peek_first()
         
-        for j in expand(queue.dequeue()):
-            if j.node_id not in nodes_traversed:
-                queue.enqueue_front(j)
-                nodes_traversed.add(j.node_id)
+        for child in expand(queue.dequeue()):
+            if child.node_id not in nodes_traversed:
+                queue.enqueue_front(child)
+                nodes_traversed.add(child.node_id)
 
     print(f"program timed out after creating {number_of_nodes} nodes\n")
-    print(nodes_traversed)
     return 0
+
+# depth limited dfs, recursive algorithm
+def depth_limited_dfs(node, depth_limit, current_depth=0, nodes_traversed=set()):
+    nodes_traversed.add(node.node_id)
+    if node.node_id== "012543":
+        return node
+
+    # stop if depth limit is reached
+    if current_depth>= depth_limit:
+        return 0
+    
+    result = 0
+
+    # expand children nodes 
+    for child in expand(node):
+        # check if child node is not a duplicate
+        if child.node_id not in nodes_traversed:
+            result = depth_limited_dfs(child,depth_limit, current_depth+1,nodes_traversed)
+
+        # return if a result is found
+        if result!=0:
+            return result
+    return 0
+
 
 # iterative deepening search
 def ids(initial_state):
     print("Iterative Deepening search: \n")
-    nodes_traversed={}
-    queue = Queue()
-    queue.enqueue_front(initial_state)
-    nodes_traversed.add(initial_state.node_id)
-
-    while len(nodes_traversed)!=MAX_MEMORY:
-
-        if queue.length==0:
-            print(f"solution not found. nodes created: {number_of_nodes}\n")
-            return 0
+    depth=0
+    while True:
         
-        if queue.peek_first().node_id=="012543":
+        # reset number of nodes created counter
+        global number_of_nodes
+        number_of_nodes = 0
+
+        result = depth_limited_dfs(initial_state,depth,nodes_traversed=set())
+
+        # return if a result is found
+        if result!=0:
             print(f"found after creating {number_of_nodes} nodes\n")
-            return queue.peek_first()
+            return result
         
-        for j in expand(queue.dequeue()):
-            if j.node_id not in nodes_traversed:
-                queue.enqueue_front(j)
-                nodes_traversed.add(j.node_id)
-                
-    print(f"program timed out after creating {number_of_nodes} nodes\n")
-    print(nodes_traversed)
-    return 0
+        # otherwise increment the depth
+        depth+=1
+        
+        # stop if too many nodes are created
+        if number_of_nodes >= MAX_MEMORY:
+            print(f"program timed out after creating {number_of_nodes} nodes\n")
+            return 0
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -308,16 +339,16 @@ if __name__ == '__main__':
     start = time.perf_counter()
     print(trace_node_path(bfs(root)))
     end = time.perf_counter() - start
-    print('{:.6f}s for the calculation\n'.format(end))
+    print('{:.6f}s\n'.format(end))
 
     # DFS
     start = time.perf_counter()
     print(trace_node_path(dfs(root)))
     end = time.perf_counter() - start
-    print('{:.6f}s for the calculation\n'.format(end))
+    print('{:.6f}s\n'.format(end))
 
     # IDS
     start = time.perf_counter()
-    trace_node_path(ids(root))
+    print(trace_node_path(ids(root)))
     end = time.perf_counter() - start
-    print('{:.6f}s for the calculation\n'.format(end))
+    print('{:.6f}s\n'.format(end))
